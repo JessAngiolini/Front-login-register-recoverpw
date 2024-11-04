@@ -1,29 +1,37 @@
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
-
-/* import { TouchableOpacity } from "react-native-gesture-handler"; */
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { recoverPassword } from './api'; // Asegúrate de que la ruta sea correcta
 
 const RecoverPassword = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [errorEmail, setErrorEmail] = useState("");
-  /* const [loading, setLoading] = useState(false); */// crear un componente para el momento de carga
+  const [email, setEmail] = useState('');
+  const [errorEmail, setErrorEmail] = useState('');
+  const [loading, setLoading] = useState(false); // Para manejar el estado de carga
 
-  const onsubmit = () => {
-    if (!validateData) {
+  const onSubmit = async () => {
+    if (!validateData()) {
       return;
     }
-    console.log("esta correcto!");
+    setLoading(true);
+    try {
+      const response = await recoverPassword(email);
+      console.log('Respuesta del backend:', response);
+      setLoading(false);
+      Alert.alert('Éxito', 'Revisa tu correo electrónico para continuar.');
+    } catch (error) {
+      console.error('Error en la recuperación de contraseña:', error);
+      setLoading(false);
+      Alert.alert('Error', 'No se pudo recuperar la contraseña.');
+    }
   };
 
   const validateData = () => {
-    setErrorEmail("");
+    setErrorEmail('');
     let valid = true;
 
-    if (!validateData(email)) {
-      setErrorEmail("Ingresa un email válido.");
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setErrorEmail('Ingresa un email válido.');
       valid = false;
     }
-
     return valid;
   };
 
@@ -32,60 +40,60 @@ const RecoverPassword = ({ navigation }) => {
       <TextInput
         style={styles.inputForm}
         placeholder="Ingresa tu email"
-        onChange={(e) => setEmail(e)}
-        defaultValue={email}
-        errorMassage={errorEmail}
-        keyboardType={"email-address"}
+        onChangeText={(text) => setEmail(text)}
+        value={email}
+        keyboardType="email-address"
         returnKeyType="send"
-      ></TextInput>
+      />
+      {errorEmail ? <Text style={styles.errorMessage}>{errorEmail}</Text> : null}
       <TouchableOpacity
         style={styles.buttonForm}
-      
-        onPress={onsubmit}
-      ><Text style={styles.buttonText}>Recuperar contraseña</Text></TouchableOpacity>
+        onPress={onSubmit}
+      >
+        <Text style={styles.buttonText}>Recuperar contraseña</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-    formContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
-      backgroundColor: '#FAFAFA', // Fondo claro
-    },
-    inputForm: {
-      height: 50, // Más alto
-      width: '100%', // Ancho completo
-      borderColor: '#CCCCCC', // Gris claro
-      borderWidth: 1,
-      marginBottom: 20,
-      paddingHorizontal: 15,
-      borderRadius: 10, // Bordes redondeados
-      backgroundColor: '#FFFFFF', // Blanco
-      fontSize: 16,
-    },
-    buttonForm: {
-      backgroundColor: '#228B22', // Verde más oscuro
-      paddingVertical: 15,
-      paddingHorizontal: 30,
-      borderRadius: 10, // Bordes más redondeados
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 10,
-    },
-    buttonText: {
-      color: '#FFFFFF',
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    errorMessage: {
-      color: '#FF0000', // Rojo para los mensajes de error
-      marginBottom: 20,
-      fontSize: 14,
-    },
-  });
-  
-  export default RecoverPassword;
-  
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#FAFAFA', 
+  },
+  inputForm: {
+    height: 50, 
+    width: '100%', 
+    borderColor: '#CCCCCC', 
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 15,
+    borderRadius: 10, 
+    backgroundColor: '#FFFFFF',
+    fontSize: 16,
+  },
+  buttonForm: {
+    backgroundColor: '#228B22',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 10, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 10,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  errorMessage: {
+    color: '#FF0000', 
+    marginBottom: 20,
+    fontSize: 14,
+  },
+});
+
+export default RecoverPassword;
